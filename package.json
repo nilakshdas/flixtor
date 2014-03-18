@@ -1,6 +1,11 @@
 {
     "name": "flixtor",
-    "version": "0.0.1",
+    "version": "0.0.0",
+    "description": "Turn your rPi into a movie box. Stream and watch videos from torrents easily with a web remote.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nilakshdas/flixtor"
+    },
     "private": false,
     "scripts": {
         "start": "node app.js"
