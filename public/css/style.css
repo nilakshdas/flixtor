@@ -1,0 +1,7 @@
+#remote-panel {
+	text-align: center;
+}
+
+#remote-panel #pause {
+	display: none;
+}

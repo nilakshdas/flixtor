@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>flixtor Remote</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-title" content="Remote">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">flixtor</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="input-group">
+                    <input type="text" id="torrent-address-input" class="form-control" placeholder="Torrent address">
+                    <span class="input-group-btn">
+                        <button id="load-torrent-btn" class="btn btn-default" type="button">Go!</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/socket.io.js"></script>
+    <script>
+        var socket = io.connect('{{ socket_address }}');
+
+        socket.on('StatusUpdate', function(status) {
+            if (status.torrent.streaming) window.location.href = 'remote';
+        });
+
+        $('#load-torrent-btn').click(function() {
+            $(this).button('loading');
+
+            socket.emit('remote-LoadTorrent', $('#torrent-address-input').val());
+        });
+    </script>
+</body>
+</html>
