@@ -4,6 +4,7 @@
     <title>flixtor Remote</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-title" content="Remote">
@@ -21,11 +22,19 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="input-group">
-                    <input type="text" id="torrent-address-input" class="form-control" placeholder="Torrent address">
+                    <input type="text" id="search-txt" class="form-control" placeholder="Movie title, actor name, director name or their IMDB code">
                     <span class="input-group-btn">
-                        <button id="load-torrent-btn" class="btn btn-default" type="button">Go!</button>
+                        <button id="search-btn" class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
                     </span>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div id="results" class="col-xs-12">
             </div>
         </div>
     </div>
@@ -39,10 +48,52 @@
             if (status.torrent.streaming) window.location.href = 'remote';
         });
 
-        $('#load-torrent-btn').click(function() {
-            $(this).button('loading');
+        $('#search-btn').click(function() {
+            var keywords = $('#search-txt').val();
+            var url = 'http://yts.re/api/list.json?keywords=' + keywords;
 
-            socket.emit('remote-LoadTorrent', $('#torrent-address-input').val());
+            var req = new XMLHttpRequest();
+            req.open("GET", url, true);
+            req.onreadystatechange = function() {
+                if (req.readyState == 4 && req.status == 200) {
+                    response = JSON.parse(req.responseText);
+
+                    if (response.error === undefined) {
+                        console.log(response);
+
+                        movies = response.MovieList;
+
+                        $('#results').html($(document.createElement('table')).addClass("table table-striped"));
+
+                        function loadTorrent(index) {
+                            return function() {socket.emit('remote-LoadTorrent', movies[index].TorrentUrl);}
+                        }
+
+                        for (var i = 0; i < movies.length; i++) {
+                            var row = $(document.createElement('tr'));
+
+                            var cover_image = $('<td><img src="' + movies[i].CoverImage + '" /></td>');
+                            var movie_title = $('<td><em>' + movies[i].MovieTitle + '</em></td>');
+                            var movie_size = $('<td>' + movies[i].Size + '</td>');
+
+                            movie_title.click(loadTorrent(i));
+
+                            row.append(cover_image);
+                            row.append(movie_title);
+                            row.append(movie_size);
+
+                            $('#results .table').append(row);
+                        }
+
+                    } else {
+                        $('#results').html($(document.createElement('div')).addClass("alert alert-danger alert-dismissable"));
+
+                        $('#results .alert').append('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>');
+                        $('#results .alert').append("Sorry, could not find anything matching your query!");
+                    }
+                }
+            };
+            req.send(null);
         });
     </script>
 </body>
