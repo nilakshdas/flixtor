@@ -44,17 +44,13 @@
 
         socket.on('StatusUpdate', function(status) {
             console.log(status);
-
             if (!status.torrent.streaming) window.location.href = '/';
-
         });
 
         socket.on('UpdateProgress', function(status) {
             console.log(status);
             $('.bar').css( "width", status+"%" );
         });
-
-
 
         socket.on('Html', function(html) {
             $( "#progress-container" ).remove();
