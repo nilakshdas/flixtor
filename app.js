@@ -83,7 +83,6 @@ io.sockets.on('connection', function(socket) {
 
     socket.on('remote-loading', function() {
         var swarm = engine.swarm;
-
         var interval = setInterval (RepeatCall, 2000 );
 
         function RepeatCall() {
@@ -98,10 +97,10 @@ io.sockets.on('connection', function(socket) {
                 var href = "http://" + address() + ":" + engine.server.address().port;
 
                 var html = '<video class="video-js vjs-default-skin"'+
-                    'controls autoplay preload="auto" width="100%" height="100%"'+
-                    'data-setup=\'{"example_option":true}\'>'+
-                    '<source src="'+href+'" type="video/mp4" />'+
-                    '</video>';
+                           'controls autoplay preload="auto" width="100%" height="100%"'+
+                           'data-setup=\'{"example_option":true}\'>'+
+                           '<source src="'+href+'" type="video/mp4" />'+
+                           '</video>';
 
                 io.sockets.emit('Html', html);
                 clearInterval(interval);
