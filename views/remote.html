@@ -4,7 +4,9 @@
     <title>flixtor Remote</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="cssvideo-js.css" rel="stylesheet">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-title" content="Remote">
@@ -18,27 +20,12 @@
             </div>
         </div>
     </nav>
-    <div class="container-fluid">
+    <div id="video-container"></div>
+    <div id="progress-container" class="container-fluid">
         <div class="row">
             <div class="col-xs-12">
-                <div id="remote-panel" class="center-block">
-                    <div class="btn-group btn-group-lg">
-                        <button type="button" id="fast-backward" class="btn btn-default" disabled="true">
-                            <span class="glyphicon glyphicon-fast-backward"></span>
-                        </button>
-                        <button type="button" id="play" class="btn btn-default">
-                            <span class="glyphicon glyphicon-play"></span>
-                        </button>
-                        <button type="button" id="pause" class="btn btn-default" disabled="true">
-                            <span class="glyphicon glyphicon-pause"></span>
-                        </button>
-                        <button type="button" id="stop" class="btn btn-default" disabled="true">
-                            <span class="glyphicon glyphicon-stop"></span>
-                        </button>
-                        <button type="button" id="fast-forward" class="btn btn-default" disabled="true">
-                            <span class="glyphicon glyphicon-fast-forward"></span>
-                        </button>
-                    </div>
+                <div class="progress progress-striped">
+                    <div class="bar" style="width: 0%;"></div>
                 </div>
             </div>
         </div>
@@ -46,6 +33,12 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/socket.io.js"></script>
+    <script src="js/video.js"></script>
+
+    <script>
+        videojs.options.flash.swf = "video-js.swf"
+    </script>
+
     <script>
         var socket = io.connect('{{ socket_address }}');
 
@@ -54,46 +47,24 @@
 
             if (!status.torrent.streaming) window.location.href = '/';
 
-            if (status.vlc.running) {
-                $('#remote-panel #pause').attr('disabled', false);
-                $('#remote-panel #stop').attr('disabled', false);
-                $('#remote-panel #fast-backward').attr('disabled', false);
-                $('#remote-panel #fast-forward').attr('disabled', false);
-            } else {
-                $('#remote-panel #pause').attr('disabled', true);
-                $('#remote-panel #stop').attr('disabled', true);
-                $('#remote-panel #fast-backward').attr('disabled', true);
-                $('#remote-panel #fast-forward').attr('disabled', true);
-            }
-
-            if (status.video.playing) {
-                $('#remote-panel #pause').show();
-                $('#remote-panel #play').hide();
-            } else {
-                $('#remote-panel #pause').hide();
-                $('#remote-panel #play').show();
-            }
         });
 
-        $('#remote-panel #play').click(function() {
-            socket.emit('remote-Play');
+        socket.on('UpdateProgress', function(status) {
+            console.log(status);
+            $('.bar').css( "width", status+"%" );
         });
 
-        $('#remote-panel #pause').click(function() {
-            socket.emit('remote-Pause');
+
+
+        socket.on('Html', function(html) {
+            $( "#progress-container" ).remove();
+            $('#video-container').append(html);
         });
 
-        $('#remote-panel #stop').click(function() {
-            socket.emit('remote-Stop');
+        $( document ).ready(function() {
+            socket.emit('remote-loading');
         });
 
-        $('#remote-panel #fast-forward').click(function() {
-            socket.emit('remote-Forward');
-        });
-
-        $('#remote-panel #fast-backward').click(function() {
-            socket.emit('remote-Backward');
-        });
     </script>
 </body>
 </html>

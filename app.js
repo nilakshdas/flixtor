@@ -7,7 +7,6 @@ var express = require('express'),
     io = require('socket.io').listen(server),
     readTorrent = require('read-torrent'),
     peerflix = require('peerflix'),
-    vlc = require('vlc-api')(),
     spawn = require('child_process').spawn;
 
 app.engine('html', swig.renderFile);
@@ -39,15 +38,11 @@ server.listen(app.get('port'), function() {
 });
 
 var engine;
-var vlc_process;
 
 var status = {
     torrent: {
         address: null,
         streaming: false
-    },
-    vlc: {
-        running: false
     },
     video: {
         stream_address: null,
@@ -82,71 +77,39 @@ io.sockets.on('connection', function(socket) {
             io.sockets.emit('StatusUpdate', status);
 
             console.log("Torrent streaming at http://" + address() + ':' + engine.server.address().port);
+
         });
     });
 
-    socket.on('remote-Play', function() {
-        console.log("Play button pressed");
+    socket.on('remote-loading', function() {
+        var swarm = engine.swarm;
 
-        if (status.vlc.running) {
-            vlc.status.resume();
+        var interval = setInterval (RepeatCall, 2000 );
 
-            status.video.playing = true;
-            io.sockets.emit('StatusUpdate', status);
-        } else {
-            status.video.stream_address = 'http://' + address() + ':' + engine.server.address().port;
+        function RepeatCall() {
+            var t = swarm.downloaded/2097152;
+            var e = t*100;
+            io.sockets.emit('UpdateProgress', e);
 
-            vlc_process = spawn('vlc', [
-                status.video.stream_address, '--fullscreen',
-                '--video-on-top', '--no-video-title-show'
-            ]);
+            console.log(swarm.downloaded);
+            if( swarm.downloaded >= 2097152 ) {
+                io.sockets.emit('UpdateProgress', 100);
 
-            vlc_process.on('exit', function(code) {
-                status.vlc.running = false;
-                status.video.playing = false;
-                io.sockets.emit('StatusUpdate', status);
-            });
+                var href = "http://" + address() + ":" + engine.server.address().port;
 
-            status.vlc.running = true;
-            status.video.playing = true;
-            io.sockets.emit('StatusUpdate', status);
+                var html = '<video class="video-js vjs-default-skin"'+
+                    'controls autoplay preload="auto" width="100%" height="100%"'+
+                    'data-setup=\'{"example_option":true}\'>'+
+                    '<source src="'+href+'" type="video/mp4" />'+
+                    '</video>';
+
+                io.sockets.emit('Html', html);
+                clearInterval(interval);
+
+            }
         }
     });
 
-    socket.on('remote-Pause', function() {
-        console.log("Pause button pressed");
 
-        if (status.vlc.running) {
-            vlc.status.pause();
 
-            status.video.playing = false;
-            io.sockets.emit('StatusUpdate', status);
-        }
-    });
-
-    socket.on('remote-Stop', function() {
-        console.log("Stop button pressed");
-
-        if (status.vlc.running) {
-            vlc.status.stop();
-
-            vlc_process.kill();
-
-            status.vlc.running = false;
-            status.video.playing = false;
-            io.sockets.emit('StatusUpdate', status);
-        }
-    });
-
-    socket.on('remote-Forward', function() {
-        console.log("Forward button pressed");
-
-        if (status.vlc.running) vlc.status.seek('+2', null);
-    });
-
-    socket.on('remote-Backward', function() {
-        console.log("Backward button pressed");
-
-        if (status.vlc.running) vlc.status.seek('-2', null);
-    });
 });
