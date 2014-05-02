@@ -16,7 +16,7 @@
         "network-address": "0.0.4",
         "socket.io": "0.9.16",
         "vlc-api": "*",
-        "read-torrent": "0.2.0",
-        "peerflix": "0.2.2"
+        "read-torrent": "1.0.0",
+        "peerflix": "0.8.1"
     }
 }
