@@ -38,6 +38,8 @@ server.listen(app.get('port'), function() {
 });
 
 var engine;
+var interval;
+var swarm;
 
 var status = {
     torrent: {
@@ -82,13 +84,13 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on('remote-loading', function() {
-        var swarm = engine.swarm;
-        var interval = setInterval (RepeatCall, 2000 );
+        swarm = engine.swarm;
+        interval = setInterval (RepeatCall, 2000 );
 
         function RepeatCall() {
-            var t = swarm.downloaded/2097152;
-            var e = t*100;
-            io.sockets.emit('UpdateProgress', e);
+            var tmpProgress = swarm.downloaded/2097152;
+            var progress = tmpProgress*100;
+            io.sockets.emit('UpdateProgress', progress);
 
             console.log(swarm.downloaded);
             if( swarm.downloaded >= 2097152 ) {
@@ -108,7 +110,5 @@ io.sockets.on('connection', function(socket) {
             }
         }
     });
-
-
 
 });

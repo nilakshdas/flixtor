@@ -6,7 +6,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <link href="cssvideo-js.css" rel="stylesheet">
+    <link href="css/video-js.css" rel="stylesheet">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-title" content="Remote">
@@ -30,6 +30,7 @@
             </div>
         </div>
     </div>
+
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/socket.io.js"></script>
@@ -53,7 +54,7 @@
         });
 
         socket.on('Html', function(html) {
-            $( "#progress-container" ).remove();
+            $('#progress-container').remove();
             $('#video-container').append(html);
         });
 
