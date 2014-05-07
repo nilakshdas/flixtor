@@ -42,6 +42,8 @@
 
     <script>
         var socket = io.connect('{{ socket_address }}');
+        var freqSecs = 1.2;
+        var intervalID;
 
         socket.on('StatusUpdate', function(status) {
             console.log(status);
@@ -54,6 +56,7 @@
         });
 
         socket.on('Html', function(html) {
+            clearInterval(intervalID);
             $('#progress-container').remove();
             $('#video-container').append(html);
         });
